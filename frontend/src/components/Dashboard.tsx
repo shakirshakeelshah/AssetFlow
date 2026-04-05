@@ -42,7 +42,7 @@ export default function Dashboard() {
         
         <div className="flex justify-between items-center mb-12">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Finance Dashboard</h1>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">AssetFlow</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
               Welcome back, <span className="font-semibold">{user?.name}</span>
             </p>
@@ -69,10 +69,6 @@ export default function Dashboard() {
         <div className="mt-10"><Insights /></div>
         <div className="mt-12"><TransactionsTable /></div>
 
-        <div className="mt-16 text-center text-sm text-gray-500">
-          Current mode: <span className="font-medium">{isDark ? "Dark" : "Light"}</span><br />
-          Click the sun/moon button to toggle
-        </div>
       </div>
     </div>
   );
