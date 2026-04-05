@@ -1,4 +1,4 @@
-# Finance Dashboard
+# AssetFlow - Finance Dashboard
 
 A modern full-stack personal finance tracking application with user authentication, built with React and Node.js.
 
