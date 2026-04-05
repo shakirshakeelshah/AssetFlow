@@ -1,0 +1,12 @@
+import { AuthProvider } from './context/AuthContext';
+import MainApp from './MainApp';
+
+function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
+}
+
+export default App;
