@@ -1,8 +1,12 @@
-import React from 'react';
-import Dashboard from './components/Dashboard';
+import { AuthProvider } from './context/AuthContext';
+import MainApp from './MainApp';
 
 function App() {
-  return <Dashboard />;
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
 }
 
 export default App;
