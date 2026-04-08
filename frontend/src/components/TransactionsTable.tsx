@@ -4,30 +4,48 @@ import { Trash2, Plus } from 'lucide-react';
 import AddTransactionModal from './AddTransactionModal';
 
 export default function TransactionsTable() {
-  const { transactions, filters, setFilters, deleteTransaction, loading } = useApp();
+  const { transactions, addTransaction, deleteTransaction, loading } = useApp();
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    search: '',
+    type: 'all' as 'all' | 'income' | 'expense',
+    category: 'all',
+    sortBy: 'date' as 'date' | 'amount',
+    sortOrder: 'desc' as 'asc' | 'desc',
+  });
 
   const filteredAndSorted = useMemo(() => {
     let result = [...transactions];
 
+    // Search filter
     if (filters.search) {
       const q = filters.search.toLowerCase();
       result = result.filter(t =>
-        t.description.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)
+        t.description.toLowerCase().includes(q) || 
+        t.category.toLowerCase().includes(q)
       );
     }
 
+    // Type filter
     if (filters.type !== 'all') {
       result = result.filter(t => t.type === filters.type);
     }
 
+    // Category filter
     if (filters.category !== 'all') {
       result = result.filter(t => t.category === filters.category);
     }
 
+    // Sorting
     result.sort((a, b) => {
-      let valA = filters.sortBy === 'date' ? new Date(a.date).getTime() : a.amount;
-      let valB = filters.sortBy === 'date' ? new Date(b.date).getTime() : b.amount;
+      let valA = filters.sortBy === 'date' 
+        ? new Date(a.date).getTime() 
+        : a.amount;
+      let valB = filters.sortBy === 'date' 
+        ? new Date(b.date).getTime() 
+        : b.amount;
+
       return filters.sortOrder === 'asc' ? valA - valB : valB - valA;
     });
 
@@ -50,18 +68,19 @@ export default function TransactionsTable() {
           </button>
         </div>
 
+        {/* Filters */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search transactions..."
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            className="px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800"
+            className="px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800 focus:outline-none focus:border-blue-500"
           />
 
           <select
             value={filters.type}
-            onChange={(e) => setFilters({ ...filters, type: e.target.value as any })}
+            onChange={(e) => setFilters({ ...filters, type: e.target.value as 'all' | 'income' | 'expense' })}
             className="px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800"
           >
             <option value="all">All Types</option>
@@ -91,42 +110,54 @@ export default function TransactionsTable() {
             </select>
             <button
               onClick={() => setFilters({ ...filters, sortOrder: filters.sortOrder === 'asc' ? 'desc' : 'asc' })}
-              className="px-5 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800"
+              className="px-5 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               {filters.sortOrder === 'asc' ? '↑' : '↓'}
             </button>
           </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+          <table className="w-full min-w-full">
+            <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
               <tr>
-                <th className="text-left p-5">Date</th>
-                <th className="text-left p-5">Description</th>
-                <th className="text-left p-5">Category</th>
-                <th className="text-right p-5">Amount</th>
-                <th className="w-12"></th>
+                <th className="text-left p-5 font-medium text-gray-600 dark:text-gray-400">Date</th>
+                <th className="text-left p-5 font-medium text-gray-600 dark:text-gray-400">Description</th>
+                <th className="text-left p-5 font-medium text-gray-600 dark:text-gray-400">Category</th>
+                <th className="text-right p-5 font-medium text-gray-600 dark:text-gray-400">Amount</th>
+                <th className="w-12 p-5"></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading ? (
-                <tr><td colSpan={5} className="text-center py-12">Loading...</td></tr>
+                <tr>
+                  <td colSpan={5} className="text-center py-12 text-gray-500">Loading transactions...</td>
+                </tr>
               ) : filteredAndSorted.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-12 text-gray-500">No transactions found</td></tr>
+                <tr>
+                  <td colSpan={5} className="text-center py-12 text-gray-500">No transactions found</td>
+                </tr>
               ) : (
-                filteredAndSorted.map(tx => (
-                  <tr key={tx.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <td className="p-5 text-gray-600 dark:text-gray-400">{new Date(tx.date).toLocaleDateString('en-IN')}</td>
-                    <td className="p-5 font-medium">{tx.description}</td>
+                filteredAndSorted.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td className="p-5 text-gray-600 dark:text-gray-400">
+                      {new Date(tx.date).toLocaleDateString('en-IN')}
+                    </td>
+                    <td className="p-5 font-medium text-gray-900 dark:text-white">{tx.description}</td>
                     <td className="p-5">
-                      <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-sm">{tx.category}</span>
+                      <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-sm rounded-full">
+                        {tx.category}
+                      </span>
                     </td>
                     <td className={`p-5 text-right font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                       {tx.type === 'income' ? '+' : ''}₹{tx.amount.toLocaleString('en-IN')}
                     </td>
                     <td className="p-5">
-                      <button onClick={() => deleteTransaction(tx.id)} className="text-red-500 hover:text-red-700">
+                      <button 
+                        onClick={() => deleteTransaction(tx.id)}
+                        className="text-red-500 hover:text-red-700 transition"
+                      >
                         <Trash2 size={18} />
                       </button>
                     </td>
@@ -138,7 +169,10 @@ export default function TransactionsTable() {
         </div>
       </div>
 
-      <AddTransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <AddTransactionModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </>
   );
 }
