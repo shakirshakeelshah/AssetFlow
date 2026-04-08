@@ -6,23 +6,19 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const JWT_SECRET = 'finance-dashboard-secret-2026';
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+  origin: '*', // Temporary for debugging - we'll restrict later
   credentials: true
 }));
 app.use(express.json());
 
-// Database setup
+// Database
 const adapter = new FileSync('db.json');
 const db = low(adapter);
-
-// Initialize default data
 db.defaults({ users: [], transactions: [] }).write();
-
-console.log('✅ Database initialized');
 
 // Register
 app.post('/api/register', async (req, res) => {
@@ -80,7 +76,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Auth Middleware
+// Protected Routes
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -94,7 +90,6 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Get transactions
 app.get('/api/transactions', authenticateToken, (req, res) => {
   const userTransactions = db.get('transactions')
     .filter({ userId: req.user.userId })
@@ -102,7 +97,6 @@ app.get('/api/transactions', authenticateToken, (req, res) => {
   res.json(userTransactions || []);
 });
 
-// Add transaction
 app.post('/api/transactions', authenticateToken, (req, res) => {
   try {
     const { date, description, amount, category, type } = req.body;
@@ -124,7 +118,6 @@ app.post('/api/transactions', authenticateToken, (req, res) => {
   }
 });
 
-// Delete transaction
 app.delete('/api/transactions/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   db.get('transactions').remove({ id, userId: req.user.userId }).write();
@@ -132,5 +125,5 @@ app.delete('/api/transactions/:id', authenticateToken, (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Backend server running successfully on http://localhost:${PORT}`);
+  console.log(`🚀 Backend server running on port ${PORT}`);
 });
