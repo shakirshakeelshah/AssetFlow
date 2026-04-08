@@ -37,8 +37,8 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors flex flex-col">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full">
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div>
@@ -67,15 +67,25 @@ export default function Dashboard() {
         </div>
 
         <SummaryCards />
-
         <div className="mt-10">
           <Insights />
         </div>
-
         <div className="mt-12">
           <TransactionsTable />
         </div>
       </div>
+
+      {/* Copyright Footer */}
+      <footer className="mt-auto py-8 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            © {new Date().getFullYear()} AssetFlow. All rights reserved.
+          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Built with ❤️ for personal finance tracking
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
