@@ -28,20 +28,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await axios.post(`${API_BASE}/api/login`, { email, password }, {
-      timeout: 10000
-    });
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-    setUser(newUser);
+    console.log("🔄 Attempting login to:", `${API_BASE}/api/login`);
+    try {
+      const res = await axios.post(`${API_BASE}/api/login`, { email, password }, {
+        timeout: 30000   // Increased to 30 seconds for cold start
+      });
+      console.log("✅ Login successful");
+      const { token: newToken, user: newUser } = res.data;
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      setUser(newUser);
+    } catch (err: any) {
+      console.error("❌ Login error:", err.message);
+      if (err.code === 'ECONNABORTED') {
+        throw new Error("Request timed out. Backend may be waking up. Try again.");
+      }
+      throw new Error(err.response?.data?.error || "Login failed. Please try again.");
+    }
   };
 
   const register = async (name: string, email: string, password: string) => {
-    await axios.post(`${API_BASE}/api/register`, { name, email, password }, {
-      timeout: 10000
-    });
-    await login(email, password);
+    console.log("🔄 Attempting register to:", `${API_BASE}/api/register`);
+    try {
+      await axios.post(`${API_BASE}/api/register`, { name, email, password }, {
+        timeout: 30000
+      });
+      await login(email, password);
+    } catch (err: any) {
+      console.error("❌ Register error:", err.message);
+      throw new Error(err.response?.data?.error || "Registration failed. Try again.");
+    }
   };
 
   const logout = () => {
