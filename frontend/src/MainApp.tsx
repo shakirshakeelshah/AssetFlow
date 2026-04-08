@@ -1,12 +1,12 @@
 import { useAuth } from './context/AuthContext';
-import AuthPage from './components/Authpage';
+import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import { AppProvider } from './context/AppContext';
 
 export default function MainApp() {
   const { user, token, isLoading } = useAuth();
 
-  console.log("MainApp rendered - user:", !!user, "token:", !!token);
+  console.log("MainApp rendered - user:", !!user, "token:", !!token, "isLoading:", isLoading);
 
   if (isLoading) {
     return (
@@ -19,15 +19,13 @@ export default function MainApp() {
     );
   }
 
-  // If we have user and token → show dashboard
   if (user && token) {
     return (
-      <AppProvider key={token}>   {/* key forces re-mount when token changes */}
+      <AppProvider key={token}>
         <Dashboard />
       </AppProvider>
     );
   }
 
-  // Otherwise show login page
   return <AuthPage />;
 }
