@@ -1,7 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const cors = require('cors');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 
@@ -9,21 +8,19 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = 'finance-dashboard-secret-2026';
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
-
 app.use(express.json());
 
-// Manual OPTIONS handler for preflight
-app.options('*', (req, res) => {
+// Manual CORS headers for every request
+app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.sendStatus(200);
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
 });
 
 // Database
@@ -84,7 +81,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Transactions
+// Transactions routes
 app.get('/api/transactions', authenticateToken, (req, res) => {
   const userTx = db.get('transactions').filter({ userId: req.user.userId }).value() || [];
   res.json(userTx);
