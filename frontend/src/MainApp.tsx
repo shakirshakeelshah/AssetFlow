@@ -1,5 +1,5 @@
 import { useAuth } from './context/AuthContext';
-import AuthPage from './components/AuthPage';     // Correct capital P
+import AuthPage from './components/AuthPage'; // Correct capital P
 import Dashboard from './components/Dashboard';
 import { AppProvider } from './context/AppContext';
 
