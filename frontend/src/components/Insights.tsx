@@ -4,28 +4,26 @@ export default function Insights() {
   const { transactions } = useApp();
 
   const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .filter((t: any) => t.type === 'income')
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
 
   const totalExpenses = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .filter((t: any) => t.type === 'expense')
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
 
-  // Highest expense
   const highestExpense = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((max, t) => t.amount > max.amount ? t : max, { amount: 0, description: '' } as any);
+    .filter((t: any) => t.type === 'expense')
+    .reduce((max: any, t: any) => (t.amount > max.amount ? t : max), { amount: 0, description: '' });
 
-  // Top spending category
   const categoryTotals = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((acc, t) => {
+    .filter((t: any) => t.type === 'expense')
+    .reduce((acc: any, t: any) => {
       acc[t.category] = (acc[t.category] || 0) + t.amount;
       return acc;
-    }, {} as Record<string, number>);
+    }, {});
 
   const topCategory = Object.entries(categoryTotals)
-    .sort((a, b) => b[1] - a[1])[0];
+    .sort((a: any, b: any) => b[1] - a[1])[0];
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-800">
@@ -48,7 +46,7 @@ export default function Insights() {
             {topCategory ? topCategory[0] : 'N/A'}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            ₹{topCategory ? topCategory[1].toLocaleString('en-IN') : '0'}
+            ₹{topCategory ? Number(topCategory[1]).toLocaleString('en-IN') : '0'}
           </p>
         </div>
 
@@ -58,11 +56,11 @@ export default function Insights() {
             <div className="flex-1 bg-green-100 dark:bg-green-900/30 rounded-full h-3">
               <div 
                 className="bg-green-600 h-3 rounded-full" 
-                style={{ width: totalIncome + totalExpenses > 0 ? `${(totalIncome / (totalIncome + totalExpenses)) * 100}%` : '50%' }}
-              ></div>
+                style={{ width: totalIncome + totalExpenses > 0 ? `${Math.round((totalIncome / (totalIncome + totalExpenses)) * 100)}%` : '50%' }}
+              />
             </div>
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {totalIncome > 0 ? Math.round((totalIncome / (totalIncome + totalExpenses)) * 100) : 50}%
+              {totalIncome + totalExpenses > 0 ? Math.round((totalIncome / (totalIncome + totalExpenses)) * 100) : 50}%
             </span>
           </div>
         </div>

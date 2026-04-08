@@ -25,7 +25,7 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
     e.preventDefault();
     setError('');
 
-    if (!formData.description || !formData.amount || !formData.category) {
+    if (!formData.description.trim() || !formData.amount || !formData.category.trim()) {
       setError("Please fill all fields");
       return;
     }
@@ -41,6 +41,7 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
         type: formData.type,
       });
 
+      // Reset form
       setFormData({
         date: new Date().toISOString().split('T')[0],
         description: '',
@@ -64,7 +65,10 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
       <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Add New Transaction</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button 
+            onClick={onClose} 
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
             <X size={24} />
           </button>
         </div>
@@ -76,14 +80,18 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, type: 'expense' })}
-                className={`flex-1 py-3 rounded-2xl font-medium transition ${formData.type === 'expense' ? 'bg-red-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}
+                className={`flex-1 py-3 rounded-2xl font-medium transition ${formData.type === 'expense' 
+                  ? 'bg-red-600 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}
               >
                 Expense
               </button>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, type: 'income' })}
-                className={`flex-1 py-3 rounded-2xl font-medium transition ${formData.type === 'income' ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}
+                className={`flex-1 py-3 rounded-2xl font-medium transition ${formData.type === 'income' 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}
               >
                 Income
               </button>
@@ -107,7 +115,7 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800"
-              placeholder="e.g. Grocery shopping"
+              placeholder="e.g. Grocery shopping or Salary"
               required
             />
           </div>
@@ -133,19 +141,19 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800"
-              placeholder="e.g. Food, Salary, Rent"
+              placeholder="e.g. Food, Transport, Salary, Rent"
               required
             />
           </div>
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {error && <p className="text-red-600 text-sm text-center">{error}</p>}
 
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-4 rounded-2xl font-semibold text-lg transition"
           >
-            {isSubmitting ? 'Adding...' : 'Add Transaction'}
+            {isSubmitting ? 'Adding Transaction...' : 'Add Transaction'}
           </button>
         </form>
       </div>
