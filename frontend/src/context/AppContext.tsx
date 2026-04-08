@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
-const API_BASE = '/api';
+const API_BASE = '/api';   // Using Vite proxy
 
 export interface Transaction {
   id: string;
@@ -26,10 +26,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (!token) return;
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/api/transactions`, config);
+      const res = await axios.get(`${API_BASE}/transactions`, config);
       setTransactions(res.data);
     } catch (err) {
-      console.error("Transactions fetch failed", err);
+      console.error("Failed to fetch transactions", err);
     } finally {
       setLoading(false);
     }
@@ -40,12 +40,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [token]);
 
   const addTransaction = async (newTx: any) => {
-    const res = await axios.post(`${API_BASE}/api/transactions`, newTx, config);
+    const res = await axios.post(`${API_BASE}/transactions`, newTx, config);
     setTransactions(prev => [res.data, ...prev]);
   };
 
-  const deleteTransaction = async (id:const string) => {
-    await axios.delete(`${API_BASE}/api/transactions/${id}`, config);
+  const deleteTransaction = async (id: string) => {
+    await axios.delete(`${API_BASE}/transactions/${id}`, config);
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
 
