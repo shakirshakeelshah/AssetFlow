@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
@@ -13,25 +13,14 @@ export interface Transaction {
   type: 'income' | 'expense';
 }
 
-interface AppContextType {
-  transactions: Transaction[];
-  filters: any;
-  setFilters: React.Dispatch<React.SetStateAction<any>>;
-  addTransaction: (tx: any) => Promise<void>;
-  deleteTransaction: (id: string) => Promise<void>;
-  loading: boolean;
-}
-
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<any>(null);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const { token } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const config = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
+  const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
   const refreshTransactions = async () => {
     if (!token) return;
@@ -40,14 +29,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const res = await axios.get(`${API_BASE}/api/transactions`, config);
       setTransactions(res.data);
     } catch (err) {
-      console.error("Failed to fetch transactions", err);
+      console.error("Transactions fetch failed", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (token) refreshTransactions();
+    refreshTransactions();
   }, [token]);
 
   const addTransaction = async (newTx: any) => {
@@ -61,21 +50,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{
-      transactions,
-      filters: { search: '', type: 'all', category: 'all', sortBy: 'date', sortOrder: 'desc' },
-      setFilters: () => {},
-      addTransaction,
-      deleteTransaction,
-      loading,
+    <AppContext.Provider value={{ 
+      transactions, 
+      addTransaction, 
+      deleteTransaction, 
+      loading 
     }}>
       {children}
     </AppContext.Provider>
   );
 };
 
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (!context) throw new Error('useApp must be used within AppProvider');
-  return context;
-};
+export const useApp = () => useContext(AppContext);

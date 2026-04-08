@@ -9,16 +9,7 @@ interface User {
   email: string;
 }
 
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-  isLoading: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<any>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -26,22 +17,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log("🔄 AuthProvider mounted. API_BASE =", API_BASE);
     const savedToken = localStorage.getItem('token');
     if (savedToken) {
       try {
         const payload = JSON.parse(atob(savedToken.split('.')[1]));
         setUser({ id: payload.userId, name: payload.name, email: payload.email });
-      } catch (err) {
-        localStorage.removeItem('token');
-      }
+      } catch (e) {}
     }
     setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
-    console.log("Attempting login to:", `${API_BASE}/api/login`);
-    const res = await axios.post(`${API_BASE}/api/login`, { email, password });
+    const res = await axios.post(`${API_BASE}/api/login`, { email, password }, {
+      timeout: 10000
+    });
     const { token: newToken, user: newUser } = res.data;
     localStorage.setItem('token', newToken);
     setToken(newToken);
@@ -49,8 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    console.log("Attempting register to:", `${API_BASE}/api/register`);
-    await axios.post(`${API_BASE}/api/register`, { name, email, password });
+    await axios.post(`${API_BASE}/api/register`, { name, email, password }, {
+      timeout: 10000
+    });
     await login(email, password);
   };
 
@@ -67,8 +57,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
