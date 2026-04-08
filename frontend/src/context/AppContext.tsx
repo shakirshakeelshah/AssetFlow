@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://assetflow-j8vw.onrender.com';
+const API_BASE = '/api';
 
 export interface Transaction {
   id: string;
@@ -44,7 +44,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setTransactions(prev => [res.data, ...prev]);
   };
 
-  const deleteTransaction = async (id: string) => {
+  const deleteTransaction = async (id:const string) => {
     await axios.delete(`${API_BASE}/api/transactions/${id}`, config);
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
