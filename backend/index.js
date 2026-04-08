@@ -9,20 +9,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = 'finance-dashboard-secret-2026';
 
-const allowedOrigins = [
-  'https://assetflow-frontend-qxtd.onrender.com',
-  'http://localhost:5173',
-  'http://localhost:5174'
-];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',                    // Allow all origins temporarily
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -30,7 +18,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Database setup
+// Database
 const adapter = new FileSync('db.json');
 const db = low(adapter);
 db.defaults({ users: [], transactions: [] }).write();
@@ -39,27 +27,18 @@ db.defaults({ users: [], transactions: [] }).write();
 app.post('/api/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
+    if (!name || !email || !password) return res.status(400).json({ error: 'All fields required' });
 
-    const existingUser = db.get('users').find({ email }).value();
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
+    const existing = db.get('users').find({ email }).value();
+    if (existing) return res.status(400).json({ error: 'User already exists' });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      password: hashedPassword
-    };
+    const hashed = await bcrypt.hash(password, 10);
+    const user = { id: Date.now().toString(), name, email, password: hashed };
+    db.get('users').push(user).write();
 
-    db.get('users').push(newUser).write();
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error during registration' });
+    res.status(201).json({ message: 'Registered successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -70,7 +49,7 @@ app.post('/api/login', async (req, res) => {
     const user = db.get('users').find({ email }).value();
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const token = jwt.sign(
@@ -79,21 +58,16 @@ app.post('/api/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.json({ 
-      token,
-      user: { id: user.id, name: user.name, email: user.email }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error during login' });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Protected routes (transactions)
+// Auth middleware
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) return res.status(401).json({ error: 'Access token required' });
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Token required' });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
@@ -102,6 +76,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Transactions routes
 app.get('/api/transactions', authenticateToken, (req, res) => {
   const userTx = db.get('transactions').filter({ userId: req.user.userId }).value() || [];
   res.json(userTx);
@@ -121,7 +96,7 @@ app.post('/api/transactions', authenticateToken, (req, res) => {
     };
     db.get('transactions').push(newTx).write();
     res.status(201).json(newTx);
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -129,7 +104,7 @@ app.post('/api/transactions', authenticateToken, (req, res) => {
 app.delete('/api/transactions/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   db.get('transactions').remove({ id, userId: req.user.userId }).write();
-  res.json({ message: 'Deleted successfully' });
+  res.json({ message: 'Deleted' });
 });
 
 app.listen(PORT, () => {
