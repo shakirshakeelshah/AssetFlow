@@ -10,18 +10,20 @@ const JWT_SECRET = 'finance-dashboard-secret-2026';
 
 app.use(express.json());
 
-// Manual CORS headers for every request
+// 🔥 Hardcoded CORS for every request
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
   next();
 });
+
+console.log("CORS headers enabled for all requests");
 
 // Database
 const adapter = new FileSync('db.json');
@@ -81,7 +83,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Transactions routes
+// Transactions
 app.get('/api/transactions', authenticateToken, (req, res) => {
   const userTx = db.get('transactions').filter({ userId: req.user.userId }).value() || [];
   res.json(userTx);
@@ -113,5 +115,5 @@ app.delete('/api/transactions/:id', authenticateToken, (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Backend running on port ${PORT}`);
+  console.log(`🚀 Backend running on port ${PORT} with manual CORS`);
 });
