@@ -10,13 +10,21 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = 'finance-dashboard-secret-2026';
 
 app.use(cors({
-  origin: '*',                    // Allow all origins temporarily
+  origin: '*',
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
 app.use(express.json());
+
+// Manual OPTIONS handler for preflight
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.sendStatus(200);
+});
 
 // Database
 const adapter = new FileSync('db.json');
@@ -76,7 +84,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Transactions routes
+// Transactions
 app.get('/api/transactions', authenticateToken, (req, res) => {
   const userTx = db.get('transactions').filter({ userId: req.user.userId }).value() || [];
   res.json(userTx);
