@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import axios from 'axios';
 
-const API_URL = '/api';   // This will work with Render proxy or VITE_API_URL
+const API_BASE = import.meta.env.VITE_API_URL || 'https://assetflow-j8vw.onrender.com';
 
 interface User {
   id: string;
@@ -26,39 +26,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      const savedToken = localStorage.getItem('token');
-      if (savedToken) {
-        try {
-          const payload = JSON.parse(atob(savedToken.split('.')[1]));
-          setUser({
-            id: payload.userId,
-            name: payload.name,
-            email: payload.email,
-          });
-          setToken(savedToken);
-        } catch (err) {
-          localStorage.removeItem('token');
-        }
+    console.log("🔄 AuthProvider mounted. API_BASE =", API_BASE);
+    const savedToken = localStorage.getItem('token');
+    if (savedToken) {
+      try {
+        const payload = JSON.parse(atob(savedToken.split('.')[1]));
+        setUser({
+          id: payload.userId,
+          name: payload.name,
+          email: payload.email,
+        });
+      } catch (err) {
+        console.error("Invalid token");
+        localStorage.removeItem('token');
       }
-      setIsLoading(false);
-    };
-
-    initializeAuth();
+    }
+    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await axios.post(`${API_URL}/login`, { email, password });
-    const { token: newToken, user: newUser } = res.data;
+    console.log("Attempting login to:", `${API_BASE}/api/login`);
+    try {
+      const res = await axios.post(`${API_BASE}/api/login`, { email, password });
+      console.log("Login successful:", res.data);
 
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-    setUser(newUser);
+      const { token: newToken, user: newUser } = res.data;
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      setUser(newUser);
+    } catch (err: any) {
+      console.error("Login failed:", err.response?.data || err.message);
+      throw new Error(err.response?.data?.error || "Login failed");
+    }
   };
 
   const register = async (name: string, email: string, password: string) => {
-    await axios.post(`${API_URL}/register`, { name, email, password });
-    await login(email, password);
+    console.log("Attempting register to:", `${API_BASE}/api/register`);
+    try {
+      const res = await axios.post(`${API_BASE}/api/register`, { name, email, password });
+      console.log("Register response:", res.data);
+      await login(email, password);
+    } catch (err: any) {
+      console.error("Register failed:", err.response?.data || err.message);
+      throw new Error(err.response?.data?.error || "Registration failed");
+    }
   };
 
   const logout = () => {
