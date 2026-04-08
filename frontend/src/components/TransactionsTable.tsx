@@ -4,8 +4,8 @@ import { Trash2, Plus } from 'lucide-react';
 import AddTransactionModal from './AddTransactionModal';
 
 export default function TransactionsTable() {
-  const { transactions, addTransaction, deleteTransaction, loading } = useApp();
-  
+  const { transactions, deleteTransaction, loading } = useApp();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
@@ -18,31 +18,26 @@ export default function TransactionsTable() {
   const filteredAndSorted = useMemo(() => {
     let result = [...transactions];
 
-    // Search filter
     if (filters.search) {
       const q = filters.search.toLowerCase();
       result = result.filter(t =>
-        t.description.toLowerCase().includes(q) || 
-        t.category.toLowerCase().includes(q)
+        t.description.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)
       );
     }
 
-    // Type filter
     if (filters.type !== 'all') {
       result = result.filter(t => t.type === filters.type);
     }
 
-    // Category filter
     if (filters.category !== 'all') {
       result = result.filter(t => t.category === filters.category);
     }
 
-    // Sorting
     result.sort((a, b) => {
-      let valA = filters.sortBy === 'date' 
+      const valA = filters.sortBy === 'date' 
         ? new Date(a.date).getTime() 
         : a.amount;
-      let valB = filters.sortBy === 'date' 
+      const valB = filters.sortBy === 'date' 
         ? new Date(b.date).getTime() 
         : b.amount;
 
@@ -52,7 +47,7 @@ export default function TransactionsTable() {
     return result;
   }, [transactions, filters]);
 
-  const categories = Array.from(new Set(transactions.map(t => t.category)));
+  const categories = Array.from(new Set(transactions.map((t: any) => t.category)));
 
   return (
     <>
@@ -68,14 +63,13 @@ export default function TransactionsTable() {
           </button>
         </div>
 
-        {/* Filters */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <input
             type="text"
             placeholder="Search transactions..."
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            className="px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800 focus:outline-none focus:border-blue-500"
+            className="px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800"
           />
 
           <select
@@ -94,8 +88,10 @@ export default function TransactionsTable() {
             className="px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl dark:bg-gray-800"
           >
             <option value="all">All Categories</option>
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
             ))}
           </select>
 
@@ -117,10 +113,9 @@ export default function TransactionsTable() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+          <table className="w-full">
+            <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
                 <th className="text-left p-5 font-medium text-gray-600 dark:text-gray-400">Date</th>
                 <th className="text-left p-5 font-medium text-gray-600 dark:text-gray-400">Description</th>
@@ -131,15 +126,11 @@ export default function TransactionsTable() {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-12 text-gray-500">Loading transactions...</td>
-                </tr>
+                <tr><td colSpan={5} className="text-center py-12 text-gray-500">Loading transactions...</td></tr>
               ) : filteredAndSorted.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-12 text-gray-500">No transactions found</td>
-                </tr>
+                <tr><td colSpan={5} className="text-center py-12 text-gray-500">No transactions found</td></tr>
               ) : (
-                filteredAndSorted.map((tx) => (
+                filteredAndSorted.map((tx: any) => (
                   <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td className="p-5 text-gray-600 dark:text-gray-400">
                       {new Date(tx.date).toLocaleDateString('en-IN')}
