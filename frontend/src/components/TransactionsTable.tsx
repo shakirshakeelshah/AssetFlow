@@ -89,7 +89,7 @@ export default function TransactionsTable() {
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>
+              <option key={String(cat)} value={String(cat)}>
                 {cat}
               </option>
             ))}
