@@ -31,13 +31,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (savedToken) {
       try {
         const payload = JSON.parse(atob(savedToken.split('.')[1]));
-        setUser({
-          id: payload.userId,
-          name: payload.name,
-          email: payload.email,
-        });
+        setUser({ id: payload.userId, name: payload.name, email: payload.email });
       } catch (err) {
-        console.error("Invalid token");
         localStorage.removeItem('token');
       }
     }
@@ -46,30 +41,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     console.log("Attempting login to:", `${API_BASE}/api/login`);
-    try {
-      const res = await axios.post(`${API_BASE}/api/login`, { email, password });
-      console.log("Login successful:", res.data);
-
-      const { token: newToken, user: newUser } = res.data;
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
-      setUser(newUser);
-    } catch (err: any) {
-      console.error("Login failed:", err.response?.data || err.message);
-      throw new Error(err.response?.data?.error || "Login failed");
-    }
+    const res = await axios.post(`${API_BASE}/api/login`, { email, password });
+    const { token: newToken, user: newUser } = res.data;
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+    setUser(newUser);
   };
 
   const register = async (name: string, email: string, password: string) => {
     console.log("Attempting register to:", `${API_BASE}/api/register`);
-    try {
-      const res = await axios.post(`${API_BASE}/api/register`, { name, email, password });
-      console.log("Register response:", res.data);
-      await login(email, password);
-    } catch (err: any) {
-      console.error("Register failed:", err.response?.data || err.message);
-      throw new Error(err.response?.data?.error || "Registration failed");
-    }
+    await axios.post(`${API_BASE}/api/register`, { name, email, password });
+    await login(email, password);
   };
 
   const logout = () => {
