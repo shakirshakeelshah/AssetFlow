@@ -1,12 +1,12 @@
 import { useAuth } from './context/AuthContext';
-import AuthPage from './components/AuthPage'; // Correct capital P
+import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import { AppProvider } from './context/AppContext';
 
 export default function MainApp() {
   const { user, token, isLoading } = useAuth();
 
-  console.log("MainApp rendered - user:", !!user, "token:", !!token, "isLoading:", isLoading);
+  console.log("🔄 MainApp - user:", !!user, "token:", !!token, "isLoading:", isLoading);
 
   if (isLoading) {
     return (
@@ -19,7 +19,9 @@ export default function MainApp() {
     );
   }
 
+  // If we have both user and token → show dashboard
   if (user && token) {
+    console.log("✅ Showing Dashboard");
     return (
       <AppProvider key={token}>
         <Dashboard />
@@ -27,5 +29,7 @@ export default function MainApp() {
     );
   }
 
+  // Otherwise show login page
+  console.log("📋 Showing Login Page");
   return <AuthPage />;
 }
