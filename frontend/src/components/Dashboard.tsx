@@ -44,7 +44,7 @@ export default function Dashboard() {
           <div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">AssetFlow</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Welcome back, <span className="font-semibold">{user?.name}</span>
+              Welcome back, <span className="font-semibold">{user?.name || 'User'}</span>
             </p>
           </div>
 
@@ -75,8 +75,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Copyright Footer */}
-      <footer className="mt-auto py-8 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+      <footer className="py-8 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             © {new Date().getFullYear()} AssetFlow. All rights reserved.
@@ -89,3 +88,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
