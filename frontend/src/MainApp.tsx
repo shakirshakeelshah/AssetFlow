@@ -2,19 +2,28 @@ import { useAuth } from './context/AuthContext';
 import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import { AppProvider } from './context/AppContext';
+import { useState, useEffect } from 'react';
 
 export default function MainApp() {
   const { user, token, isLoading } = useAuth();
+  const [showDashboard, setShowDashboard] = useState(false);
 
-  console.log("MainApp rendered → user:", !!user, "token:", !!token, "isLoading:", isLoading);
+  useEffect(() => {
+    if (user && token) {
+      console.log("✅ Token & User detected - forcing Dashboard");
+      setShowDashboard(true);
+    } else {
+      setShowDashboard(false);
+    }
+  }, [user, token]);
+
+  console.log("MainApp rendered → showDashboard:", showDashboard, "user:", !!user, "token:", !!token);
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white">Loading...</div>;
   }
 
-  // Force show dashboard if we have token (even if user object is delayed)
-  if (token) {
-    console.log("✅ Token detected - showing Dashboard");
+  if (showDashboard) {
     return (
       <AppProvider key={token}>
         <Dashboard />
@@ -22,6 +31,5 @@ export default function MainApp() {
     );
   }
 
-  console.log("📋 Showing Login Page");
   return <AuthPage />;
 }
