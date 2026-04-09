@@ -39,6 +39,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(newUser);
 
     console.log("Login successful - token saved");
+
+    // Force reload to ensure dashboard loads
+    setTimeout(() => {
+      window.location.reload();
+    }, 800);
+
     return newUser;
   };
 
