@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
-const API_BASE = '/api';   // Using Vite proxy
+const API_BASE = 'https://assetflow-j8vw.onrender.com/api';   // Full URL
 
 export interface Transaction {
   id: string;
@@ -28,8 +28,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await axios.get(`${API_BASE}/transactions`, config);
       setTransactions(res.data);
-    } catch (err) {
-      console.error("Failed to fetch transactions", err);
+      console.log("✅ Transactions loaded:", res.data.length);
+    } catch (err: any) {
+      console.error("❌ Failed to fetch transactions:", err.response?.status, err.message);
     } finally {
       setLoading(false);
     }
