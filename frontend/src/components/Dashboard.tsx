@@ -36,7 +36,8 @@ export default function Dashboard() {
     }
   };
 
-  const displayName = user?.name || 'User';
+  // Fallback name handling
+  const displayName = user?.name || user?.email?.split('@')[0] || 'User';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors flex flex-col">
